@@ -13,6 +13,8 @@
 #include <string>
 #include <functional>
 #include "std_msgs/msg/string.hpp"
+#include <boost/bind.hpp>
+
 // #define PRINT_FLAG 
 
 using namespace std;
@@ -40,7 +42,7 @@ public:
     this->declare_parameter<std::string>("target_frame", "");
     this->declare_parameter<std::string>("fixed_frame", "");
     rclcpp::QoS qos(rclcpp::KeepLast(7));
-    lidarPublisher = this->create_publisher<sensor_msgs::msg::PointCloud2>("pandar");
+    lidarPublisher = this->create_publisher<sensor_msgs::msg::PointCloud2>("pandar",10);
     packetPublisher = this->create_publisher<hesai_lidar::msg::PandarScan>("pandar_packets", qos);
     this->timer_callback();
   }
@@ -50,6 +52,7 @@ private:
 
   void lidarCallback(boost::shared_ptr<PPointCloud> cld, double timestamp, hesai_lidar::msg::PandarScan::SharedPtr scan) // the timestamp from first point cloud of cld
   {
+    RCLCPP_DEBUG(this->get_logger(), "lidarCallback called");
     if(m_sPublishType == "both" || m_sPublishType == "points"){
       pcl_conversions::toPCL(rclcpp::Time(timestamp), cld->header.stamp);
       sensor_msgs::msg::PointCloud2 output;
@@ -114,6 +117,8 @@ private:
     this->get_parameter("target_frame", targetFrame);
     this->get_parameter("fixed_frame", fixedFrame);
     this->get_parameter("background_b", targetFrame);
+
+    RCLCPP_INFO(this->get_logger(), "server_ip: %s", serverIp.c_str());
   
     if(!pcapFile.empty()){
       hsdk = new PandarGeneralSDK(pcapFile, boost::bind(&HesaiLidarClient::lidarCallback, this, _1, _2, _3), \
@@ -161,6 +166,8 @@ private:
     
     if (hsdk != NULL) {
         hsdk->Start();
+        RCLCPP_INFO(this->get_logger(), "HesaiLidarClient started successfully");
+
         // hsdk->LoadLidarCorrectionFile("...");  // parameter is stream in lidarCorrectionFile
     } else {
         printf("create sdk fail\n");

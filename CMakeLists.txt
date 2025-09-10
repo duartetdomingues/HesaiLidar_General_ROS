@@ -2,15 +2,21 @@ cmake_minimum_required(VERSION 3.5)
 project(hesai_lidar)
 
 # Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 find_package( Boost REQUIRED  COMPONENTS thread)
 find_package(Boost REQUIRED COMPONENTS system)
-# find_package(PCL REQUIRED)
+find_package(PCL REQUIRED)
+find_package(pcl_conversions REQUIRED) 
+#find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2_msgs REQUIRED)
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -20,6 +26,12 @@ find_package(rosidl_default_generators REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(rmw REQUIRED)
+find_package(rcl_interfaces REQUIRED)
+find_package(image_transport REQUIRED)
+find_package(class_loader REQUIRED)
+
+
 # install(FILES DESTINATION share/${PROJECT_NAME})
 # ament_export_dependencies(rosidl_default_runtime)
 # ament_export_dependencies(rosidl_default_runtime)
@@ -31,7 +43,7 @@ find_package(sensor_msgs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/PandarPacket.msg"
   "msg/PandarScan.msg"
-  DEPENDENCIES builtin_interfaces 
+  DEPENDENCIES builtin_interfaces std_msgs tf2_msgs 
 )
 find_package(PCL REQUIRED COMPONENTS io)
 ament_export_dependencies(rosidl_default_runtime)
@@ -47,7 +59,13 @@ target_include_directories(PandarGeneral PRIVATE
     src/HesaiLidar_General_SDK/src/PandarGeneralRaw/
     ${Boost_INCLUDE_DIRS}
     ${PCL_INCLUDE_DIRS}
-    # ${ament_INCLUDE_DIRS}
+    ${ament_INCLUDE_DIRS}
+    ${tf2_geometry_msgs_INCLUDE_DIRS}
+    ${plc_conversions_INCLUDE_DIRS}
+    ${rclcpp_INCLUDE_DIRS}
+    ${rmw_INCLUDE_DIRS}
+    ${rcl_interfaces_INCLUDE_DIRS}
+    ${tf2_ros_INCLUDE_DIRS}
 )
 target_link_libraries(PandarGeneral
     ${Boost_LIBRARIES}
@@ -71,6 +89,12 @@ target_include_directories(PandarGeneralSDK PRIVATE
     src/HesaiLidar_General_SDK/src/PandarGeneralRaw/include
     ${Boost_INCLUDE_DIRS}
     ${PCL_INCLUDE_DIRS}
+    ${tf2_geometry_msgs_INCLUDE_DIRS}
+    ${pcl_conversions_INCLUDE_DIRS}
+    ${rclcpp_INCLUDE_DIRS}
+    ${rmw_INCLUDE_DIRS}
+    ${rcl_interfaces_INCLUDE_DIRS}
+    ${tf2_ros_INCLUDE_DIRS}
     # ${YAML_CPP_INCLUDE_DIRS}
 )
 
@@ -99,6 +123,9 @@ ament_target_dependencies(hesai_lidar_node
   "sensor_msgs"
   "std_msgs"
   "tf2_geometry_msgs"
+  "tf2_ros"
+  "image_transport"
+  "class_loader"
 )
 
 target_include_directories(hesai_lidar_node PRIVATE
@@ -106,6 +133,12 @@ target_include_directories(hesai_lidar_node PRIVATE
     src/HesaiLidar_General_SDK/src/PandarGeneralRaw/include
     ${PCL_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
+    ${tf2_geometry_msgs_INCLUDE_DIRS}
+    ${pcl_conversions_INCLUDE_DIRS}
+    ${rclcpp_INCLUDE_DIRS}
+    ${rmw_INCLUDE_DIRS}
+    ${rcl_interfaces_INCLUDE_DIRS}
+    ${tf2_ros_INCLUDE_DIRS}
 )
 
 target_link_libraries(hesai_lidar_node 

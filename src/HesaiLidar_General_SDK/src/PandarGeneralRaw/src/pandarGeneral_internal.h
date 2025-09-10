@@ -35,8 +35,11 @@
 #include <hesai_lidar/msg/pandar_scan.hpp>
 #include <hesai_lidar/msg/pandar_packet.hpp>
 #include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>  // Este define tf2_ros::Buffer
+#include <tf2_ros/buffer_interface.h>
 // #include <geometry_msgs/TransformStamped.h>
 #include <Eigen/Dense>
+#include <boost/bind.hpp>
 
 #define SOB_ANGLE_SIZE (4)
 #define RAW_MEASURE_SIZE (3)
